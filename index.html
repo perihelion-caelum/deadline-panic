@@ -1,0 +1,1025 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deadline Panic 3.0</title>
+
+<style>
+:root {
+  --bg: #080e1c;
+  --panel: #101a2d;
+  --panel2: #15223a;
+  --line: #253651;
+  --text: #edf4ff;
+  --muted: #8ea2bf;
+  --blue: #54a8ff;
+  --cyan: #55e0e8;
+  --green: #63d9a0;
+  --yellow: #ffc96b;
+  --red: #ff7185;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top right, #15294b, var(--bg) 45%);
+  color: var(--text);
+  font-family: Inter, "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+button, input, select, textarea { font: inherit; }
+
+button { cursor: pointer; }
+
+.app {
+  display: grid;
+  grid-template-columns: 235px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: rgba(8,15,29,.95);
+  border-right: 1px solid var(--line);
+  padding: 28px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.logo {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.logo span { color: var(--cyan); }
+
+.tagline {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 5px;
+  letter-spacing: 2px;
+}
+
+.nav {
+  display: grid;
+  gap: 8px;
+}
+
+.nav button {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  padding: 13px;
+  text-align: left;
+  border-radius: 10px;
+}
+
+.nav button.active,
+.nav button:hover {
+  background: var(--panel2);
+  color: var(--cyan);
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+main { padding: 32px; max-width: 1450px; width: 100%; }
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+h1 { margin: 0; font-size: clamp(24px, 4vw, 34px); }
+
+.subtitle { color: var(--muted); margin-top: 7px; }
+
+.clock {
+  color: var(--cyan);
+  font-size: 13px;
+  background: var(--panel);
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.card, .stat {
+  background: linear-gradient(145deg, var(--panel), #0d1729);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.stat-label { color: var(--muted); font-size: 12px; }
+
+.stat-value {
+  font-size: 30px;
+  font-weight: 750;
+  margin-top: 12px;
+}
+
+.stat-note { color: var(--muted); font-size: 11px; margin-top: 5px; }
+
+.content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(270px, .8fr);
+  gap: 18px;
+}
+
+.card { margin-bottom: 18px; }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.card h2 { font-size: 16px; margin: 0; }
+
+button.primary {
+  border: 0;
+  color: #061323;
+  background: linear-gradient(100deg, var(--cyan), var(--blue));
+  padding: 11px 16px;
+  border-radius: 9px;
+  font-weight: 750;
+}
+
+button.secondary {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 9px 12px;
+  border-radius: 9px;
+}
+
+button.danger {
+  background: transparent;
+  border: 1px solid #713747;
+  color: var(--red);
+  padding: 7px 10px;
+  border-radius: 8px;
+}
+
+input, select, textarea {
+  background: #091323;
+  color: var(--text);
+  border: 1px solid var(--line);
+  padding: 11px;
+  border-radius: 9px;
+  width: 100%;
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--blue);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-grid .full { grid-column: 1 / -1; }
+
+label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.field { min-width: 0; }
+
+.task-list { display: grid; gap: 10px; }
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #0b1628;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 13px;
+}
+
+.task.done { opacity: .55; }
+
+.task.done .task-title { text-decoration: line-through; }
+
+.task-info { flex: 1; min-width: 0; }
+
+.task-title { font-size: 13px; font-weight: 650; overflow-wrap: anywhere; }
+
+.task-meta {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+}
+
+.task-actions { display: flex; gap: 6px; }
+
+.task-actions button {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  padding: 5px;
+}
+
+.priority {
+  font-size: 10px;
+  border-radius: 20px;
+  padding: 5px 8px;
+  white-space: nowrap;
+}
+
+.high { background: #542537; color: #ff9bad; }
+.medium { background: #55401f; color: #ffd18b; }
+.low { background: #173e3b; color: #8ce7c2; }
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 30px 10px;
+  font-size: 13px;
+}
+
+.timer {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.timer-display {
+  font-size: clamp(48px, 9vw, 70px);
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--cyan);
+  margin: 20px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.timer-options {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.timer-options button {
+  border: 1px solid var(--line);
+  color: var(--muted);
+  background: var(--panel2);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.timer-options button.selected {
+  color: var(--cyan);
+  border-color: var(--cyan);
+}
+
+.progress {
+  height: 7px;
+  background: #263650;
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.progress div {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  transition: width .3s;
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(90px, 1fr));
+  gap: 9px;
+  overflow-x: auto;
+}
+
+.day {
+  background: #0b1628;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 12px;
+  min-height: 140px;
+}
+
+.day strong { font-size: 12px; }
+
+.day small { display: block; color: var(--muted); margin: 5px 0 12px; }
+
+.day-task {
+  background: #183354;
+  color: #c9e5ff;
+  padding: 7px;
+  border-radius: 7px;
+  font-size: 10px;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+.toast {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  background: #172c45;
+  border: 1px solid var(--cyan);
+  padding: 13px 18px;
+  border-radius: 10px;
+  display: none;
+  z-index: 10;
+  max-width: calc(100% - 44px);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #000a;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 5;
+}
+
+.modal.open { display: flex; }
+
+.modal-box {
+  width: min(520px, 100%);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 23px;
+  border-radius: 17px;
+}
+
+.modal-box h2 { margin-top: 0; }
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+@media(max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { padding: 15px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .nav { display: flex; overflow-x: auto; }
+  .nav button { white-space: nowrap; }
+  .sidebar-bottom { display: none; }
+  main { padding: 20px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media(max-width: 650px) {
+  .content-grid { grid-template-columns: 1fr; }
+  .topbar { align-items: flex-start; flex-direction: column; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .full { grid-column: auto; }
+  .task { flex-wrap: wrap; }
+  .task-actions { margin-left: auto; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div>
+    <div class="logo">DEADLINE <span>PANIC.</span></div>
+    <div class="tagline">STUDENT MISSION CONTROL</div>
+  </div>
+
+  <nav class="nav">
+    <button class="active" data-page="dashboard">◈ Dashboard</button>
+    <button data-page="tasks">▤ My Tasks</button>
+    <button data-page="planner">▦ Weekly Planner</button>
+    <button data-page="focus">◷ Focus Room</button>
+    <button data-page="settings">⚙ Settings</button>
+  </nav>
+
+  <div class="sidebar-bottom">
+    SYSTEM STATUS: OPERATIONAL<br>
+    STORAGE: LOCAL BROWSER<br>
+    VERSION: 3.0 OFFLINE
+  </div>
+</aside>
+
+<main>
+  <div class="topbar">
+    <div>
+      <h1 id="pageTitle">Mission Dashboard</h1>
+      <div class="subtitle" id="greeting">Your deadlines. Your strategy. Your victory.</div>
+    </div>
+    <div class="clock" id="clock">00:00:00</div>
+  </div>
+
+  <section class="page active" id="dashboard">
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">TOTAL TASKS</div>
+        <div class="stat-value" id="totalStat">0</div>
+        <div class="stat-note">All missions</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">COMPLETED</div>
+        <div class="stat-value" id="doneStat">0</div>
+        <div class="stat-note">Missions accomplished</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">PENDING</div>
+        <div class="stat-value" id="pendingStat">0</div>
+        <div class="stat-note">Still in progress</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">OVERDUE</div>
+        <div class="stat-value" id="overdueStat">0</div>
+        <div class="stat-note">Need attention</div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <div>
+        <div class="card">
+          <div class="card-head">
+            <h2>Active Missions</h2>
+            <button class="primary" onclick="openTaskModal()">+ New Task</button>
+          </div>
+          <div id="dashboardTasks" class="task-list"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h2>Mission Progress</h2>
+          <div class="stat-value" id="progressText">0%</div>
+          <div class="progress"><div id="progressBar"></div></div>
+          <div class="stat-note">Your completed tasks out of all tasks</div>
+        </div>
+
+        <div class="card">
+          <h2>Deadline Radar</h2>
+          <div id="deadlineRadar" class="task-list" style="margin-top:15px"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="tasks">
+    <div class="card">
+      <div class="card-head">
+        <h2>Mission Inventory</h2>
+        <button class="primary" onclick="openTaskModal()">+ Add Mission</button>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px">
+        <input id="searchTasks" placeholder="Search missions..." oninput="renderTasks()" style="flex:1;min-width:150px">
+        <select id="filterTasks" onchange="renderTasks()" style="width:auto">
+          <option value="all">All tasks</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="high">High priority</option>
+        </select>
+      </div>
+      <div id="allTasks" class="task-list"></div>
+    </div>
+  </section>
+
+  <section class="page" id="planner">
+    <div class="card">
+      <div class="card-head">
+        <h2>Seven-Day Mission Planner</h2>
+        <button class="secondary" onclick="renderPlanner()">Refresh</button>
+      </div>
+      <p class="subtitle">Tasks appear on the date you assign them.</p>
+      <div id="weekGrid" class="week-grid"></div>
+    </div>
+  </section>
+
+  <section class="page" id="focus">
+    <div class="card">
+      <h2 style="text-align:center">FOCUS ROOM</h2>
+      <p class="subtitle" style="text-align:center">One mission. One session. No distractions.</p>
+      <div class="timer">
+        <div class="timer-options">
+          <button class="selected" onclick="setTimer(25,this)">25 min</button>
+          <button onclick="setTimer(15,this)">15 min</button>
+          <button onclick="setTimer(50,this)">50 min</button>
+        </div>
+        <div class="timer-display" id="timerDisplay">25:00</div>
+        <div class="timer-controls">
+          <button class="primary" id="timerStart" onclick="toggleTimer()">START FOCUS</button>
+          <button class="secondary" onclick="resetTimer()">RESET</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Focus Protocol</h2>
+      <p class="subtitle">1. Choose one task.</p>
+      <p class="subtitle">2. Set your timer.</p>
+      <p class="subtitle">3. Put distractions away.</p>
+      <p class="subtitle">4. Take a short break after the session.</p>
+    </div>
+  </section>
+
+  <section class="page" id="settings">
+    <div class="card">
+      <h2>System Settings</h2>
+      <div style="margin-top:20px">
+        <label>MISSION CONTROL NAME</label>
+        <input id="missionName" placeholder="My Mission Control">
+      </div>
+      <div style="margin-top:18px">
+        <label>NOTIFICATIONS</label>
+        <button class="secondary" onclick="enableNotifications()">Enable browser notifications</button>
+      </div>
+      <div style="margin-top:25px">
+        <h2>Data Management</h2>
+        <p class="subtitle">Your tasks are saved in this browser. Export a backup before clearing browser data.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:15px">
+          <button class="primary" onclick="exportData()">Export backup</button>
+          <button class="secondary" onclick="document.getElementById('importFile').click()">Import backup</button>
+          <button class="danger" onclick="clearAll()">Delete all tasks</button>
+        </div>
+        <input type="file" id="importFile" accept=".json,application/json" hidden onchange="importData(event)">
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+
+<div class="modal" id="taskModal">
+  <div class="modal-box">
+    <h2 id="modalTitle">Create a Mission</h2>
+    <form id="taskForm">
+      <div class="form-grid">
+        <div class="field full">
+          <label>TASK TITLE</label>
+          <input id="taskTitle" required maxlength="100" placeholder="e.g. Complete Science chapter">
+        </div>
+        <div class="field">
+          <label>SUBJECT / CATEGORY</label>
+          <select id="taskCategory">
+            <option>Science</option><option>Mathematics</option>
+            <option>Social Science</option><option>English</option>
+            <option>Hindi</option><option>Computer Science</option>
+            <option>Personal</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>PRIORITY</label>
+          <select id="taskPriority">
+            <option value="high">High</option>
+            <option value="medium" selected>Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>DEADLINE</label>
+          <input type="date" id="taskDue">
+        </div>
+        <div class="field">
+          <label>PLANNED DATE</label>
+          <input type="date" id="taskPlanned">
+        </div>
+        <div class="field">
+          <label>ESTIMATED TIME (MINUTES)</label>
+          <input type="number" id="taskEstimate" min="1" max="1440" value="30">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" onclick="closeTaskModal()">Cancel</button>
+        <button class="primary" type="submit">Save Mission</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = "deadlinePanicOffline_v3";
+
+let tasks = [];
+let editingId = null;
+let timerSeconds = 25 * 60;
+let timerInitial = 25 * 60;
+let timerInterval = null;
+let timerRunning = false;
+
+function loadData() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    tasks = Array.isArray(saved) ? saved.filter(t =>
+      t && typeof t.id === "string" && typeof t.title === "string"
+    ) : [];
+  } catch {
+    tasks = [];
+  }
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  renderAll();
+}
+
+function toast(message) {
+  const el = document.getElementById("toast");
+  el.textContent = message;
+  el.style.display = "block";
+  clearTimeout(toast.timeout);
+  toast.timeout = setTimeout(() => el.style.display = "none", 2500);
+}
+
+function todayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function formatDate(date) {
+  if (!date) return "No deadline";
+  return new Date(date + "T00:00:00").toLocaleDateString("en-IN", {
+    day: "numeric", month: "short"
+  });
+}
+
+function isOverdue(task) {
+  return !task.completed && task.due && task.due < todayString();
+}
+
+function taskHTML(task) {
+  const dueText = task.due ? formatDate(task.due) : "No deadline";
+  const overdue = isOverdue(task);
+  return `
+    <div class="task ${task.completed ? "done" : ""}">
+      <input type="checkbox" ${task.completed ? "checked" : ""}
+        onchange="toggleTask('${task.id}')" style="width:17px;height:17px">
+      <div class="task-info">
+        <div class="task-title">${escapeHTML(task.title)}</div>
+        <div class="task-meta">
+          ${escapeHTML(task.category)} · ${task.estimate || 30} min ·
+          <span style="color:${overdue ? "var(--red)" : "var(--muted)"}">
+            ${overdue ? "OVERDUE · " : ""}${dueText}
+          </span>
+        </div>
+      </div>
+      <span class="priority ${task.priority}">${task.priority.toUpperCase()}</span>
+      <div class="task-actions">
+        <button title="Edit" onclick="editTask('${task.id}')">✎</button>
+        <button title="Delete" onclick="deleteTask('${task.id}')">✕</button>
+      </div>
+    </div>`;
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;",
+    '"':"&quot;", "'":"&#39;"
+  })[char]);
+}
+
+function renderStats() {
+  const total = tasks.length;
+  const done = tasks.filter(t => t.completed).length;
+  const pending = total - done;
+  const overdue = tasks.filter(isOverdue).length;
+  const percent = total ? Math.round(done / total * 100) : 0;
+
+  document.getElementById("totalStat").textContent = total;
+  document.getElementById("doneStat").textContent = done;
+  document.getElementById("pendingStat").textContent = pending;
+  document.getElementById("overdueStat").textContent = overdue;
+  document.getElementById("progressText").textContent = percent + "%";
+  document.getElementById("progressBar").style.width = percent + "%";
+}
+
+function renderDashboard() {
+  const active = tasks.filter(t => !t.completed)
+    .sort((a,b) => priorityRank(a.priority)-priorityRank(b.priority));
+
+  document.getElementById("dashboardTasks").innerHTML =
+    active.length ? active.slice(0,6).map(taskHTML).join("") :
+    `<div class="empty">No active missions. Time to create one!</div>`;
+
+  const upcoming = active.filter(t => t.due).sort((a,b) => a.due.localeCompare(b.due));
+  document.getElementById("deadlineRadar").innerHTML =
+    upcoming.length ? upcoming.slice(0,4).map(t =>
+      `<div class="task-info">
+        <div class="task-title">${escapeHTML(t.title)}</div>
+        <div class="task-meta">${formatDate(t.due)} ${isOverdue(t) ? "· OVERDUE" : ""}</div>
+      </div>`
+    ).join("") : `<div class="empty">No deadlines set.</div>`;
+}
+
+function priorityRank(priority) {
+  return {high:0, medium:1, low:2}[priority] ?? 3;
+}
+
+function renderTasks() {
+  const query = (document.getElementById("searchTasks").value || "").toLowerCase();
+  const filter = document.getElementById("filterTasks").value;
+
+  const filtered = tasks.filter(t => {
+    const matches = t.title.toLowerCase().includes(query) ||
+      t.category.toLowerCase().includes(query);
+    const filterMatches =
+      filter === "all" ||
+      (filter === "pending" && !t.completed) ||
+      (filter === "completed" && t.completed) ||
+      (filter === "high" && t.priority === "high");
+    return matches && filterMatches;
+  });
+
+  document.getElementById("allTasks").innerHTML =
+    filtered.length ? filtered.map(taskHTML).join("") :
+    `<div class="empty">No matching missions found.</div>`;
+}
+
+function renderPlanner() {
+  const start = new Date();
+  start.setHours(0,0,0,0);
+  let html = "";
+
+  for (let i=0; i<7; i++) {
+    const date = new Date(start);
+    date.setDate(start.getDate()+i);
+    const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+    const dayTasks = tasks.filter(t => !t.completed && t.planned === key);
+
+    html += `<div class="day">
+      <strong>${date.toLocaleDateString("en-IN",{weekday:"short"})}</strong>
+      <small>${date.toLocaleDateString("en-IN",{day:"numeric",month:"short"})}</small>
+      ${dayTasks.map(t => `<div class="day-task">${escapeHTML(t.title)}</div>`).join("")}
+      ${dayTasks.length ? `<small>${dayTasks.length} task(s)</small>` : `<small>Clear schedule</small>`}
+    </div>`;
+  }
+
+  document.getElementById("weekGrid").innerHTML = html;
+}
+
+function renderAll() {
+  renderStats();
+  renderDashboard();
+  renderTasks();
+  renderPlanner();
+}
+
+function openTaskModal() {
+  editingId = null;
+  document.getElementById("taskForm").reset();
+  document.getElementById("modalTitle").textContent = "Create a Mission";
+  document.getElementById("taskEstimate").value = 30;
+  document.getElementById("taskModal").classList.add("open");
+}
+
+function closeTaskModal() {
+  document.getElementById("taskModal").classList.remove("open");
+}
+
+function editTask(id) {
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+
+  editingId = id;
+  document.getElementById("modalTitle").textContent = "Edit Mission";
+  document.getElementById("taskTitle").value = task.title;
+  document.getElementById("taskCategory").value = task.category;
+  document.getElementById("taskPriority").value = task.priority;
+  document.getElementById("taskDue").value = task.due || "";
+  document.getElementById("taskPlanned").value = task.planned || "";
+  document.getElementById("taskEstimate").value = task.estimate || 30;
+  document.getElementById("taskModal").classList.add("open");
+}
+
+document.getElementById("taskForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const title = document.getElementById("taskTitle").value.trim();
+  if (!title) return;
+
+  const taskData = {
+    title,
+    category: document.getElementById("taskCategory").value,
+    priority: document.getElementById("taskPriority").value,
+    due: document.getElementById("taskDue").value,
+    planned: document.getElementById("taskPlanned").value,
+    estimate: Math.max(1, Math.min(1440, Number(document.getElementById("taskEstimate").value) || 30))
+  };
+
+  if (editingId) {
+    const task = tasks.find(t => t.id === editingId);
+    if (task) Object.assign(task, taskData);
+    toast("Mission updated.");
+  } else {
+    tasks.push({
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+      ...taskData,
+      completed: false,
+      created: Date.now()
+    });
+    toast("New mission added.");
+  }
+
+  saveData();
+  closeTaskModal();
+});
+
+function toggleTask(id) {
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+  task.completed = !task.completed;
+  saveData();
+  toast(task.completed ? "Mission accomplished!" : "Mission reopened.");
+}
+
+function deleteTask(id) {
+  if (!confirm("Delete this mission permanently?")) return;
+  tasks = tasks.filter(t => t.id !== id);
+  saveData();
+  toast("Mission deleted.");
+}
+
+document.querySelectorAll(".nav button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+
+    button.classList.add("active");
+    document.getElementById(button.dataset.page).classList.add("active");
+
+    const titles = {
+      dashboard:"Mission Dashboard",
+      tasks:"My Missions",
+      planner:"Weekly Planner",
+      focus:"Focus Room",
+      settings:"System Settings"
+    };
+    document.getElementById("pageTitle").textContent = titles[button.dataset.page];
+  });
+});
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById("clock").textContent =
+    now.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"}) +
+    " · " + now.toLocaleTimeString("en-IN");
+}
+
+function setTimer(minutes, button) {
+  if (timerRunning) return toast("Pause the timer before changing sessions.");
+  timerSeconds = minutes * 60;
+  timerInitial = timerSeconds;
+  document.querySelectorAll(".timer-options button").forEach(b => b.classList.remove("selected"));
+  button.classList.add("selected");
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const mins = Math.floor(timerSeconds / 60);
+  const secs = timerSeconds % 60;
+  document.getElementById("timerDisplay").textContent =
+    String(mins).padStart(2,"0") + ":" + String(secs).padStart(2,"0");
+}
+
+function toggleTimer() {
+  if (timerRunning) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    document.getElementById("timerStart").textContent = "RESUME FOCUS";
+    return;
+  }
+
+  if (timerSeconds <= 0) resetTimer();
+
+  timerRunning = true;
+  document.getElementById("timerStart").textContent = "PAUSE";
+
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    updateTimerDisplay();
+
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      document.getElementById("timerStart").textContent = "START FOCUS";
+      toast("Focus session complete. Take a break!");
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("Deadline Panic", {body:"Your focus session is complete!"});
+      }
+    }
+  },1000);
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerSeconds = timerInitial;
+  document.getElementById("timerStart").textContent = "START FOCUS";
+  updateTimerDisplay();
+}
+
+async function enableNotifications() {
+  if (!("Notification" in window)) return toast("Notifications are not supported here.");
+  const permission = await Notification.requestPermission();
+  toast(permission === "granted" ? "Notifications enabled!" : "Notifications not enabled.");
+}
+
+function exportData() {
+  const data = {
+    version: 3,
+    exportedAt: new Date().toISOString(),
+    tasks
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "deadline-panic-backup.json";
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("Backup exported.");
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      const incoming = Array.isArray(data) ? data : data.tasks;
+      if (!Array.isArray(incoming)) throw new Error("Invalid backup");
+      if (!confirm("Import this backup and replace your current tasks?")) return;
+      tasks = incoming.filter(t => t && typeof t.id === "string" && typeof t.title === "string");
+      saveData();
+      toast("Backup imported.");
+    } catch {
+      toast("That backup file could not be read.");
+    } finally {
+      event.target.value = "";
+    }
+  };
+  reader.readAsText(file);
+}
+
+function clearAll() {
+  if (!confirm("This will permanently delete all tasks in this browser. Continue?")) return;
+  tasks = [];
+  saveData();
+  toast("All tasks deleted.");
+}
+
+document.getElementById("missionName").value =
+  localStorage.getItem("deadlinePanicName") || "My Mission Control";
+
+document.getElementById("missionName").addEventListener("change", event => {
+  localStorage.setItem("deadlinePanicName", event.target.value.trim());
+  toast("Mission control name saved.");
+});
+
+loadData();
+renderAll();
+updateClock();
+updateTimerDisplay();
+setInterval(updateClock,1000);
+</script>
+</body>
+</html>
